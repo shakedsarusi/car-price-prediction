@@ -17,6 +17,8 @@ public class main {
 		
 		//db.printCleanDoubleData();
 		
+		
+		
 		multipleLinearRegression mlr = new multipleLinearRegression(db.getX_Set(),db.getY_Set());
 		mlr.gradientDescent();
 		System.out.println(mlr.percentAccuracy());
