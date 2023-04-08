@@ -1,9 +1,9 @@
-package carPricePrediction;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -17,7 +17,8 @@ public class DB {
 	public double[][] cleanDoubleData;
 	public double[] Y_Set;
 	public double[][] X_Set;
-	
+	public static Map<String, Double> carToFloat;
+	public static Map<Double, String> floatToCar;
 	
 	public DB(int rows, int cols, String path) {
 		
@@ -25,6 +26,8 @@ public class DB {
 		this.cols = cols;
 		this.path = path;
 		this.stringData = new String[this.rows][this.cols];
+		this.carToFloat = new HashMap<String, Double>();
+		this.floatToCar = new HashMap<Double, String>();
 		
 		 String line;
 	        try (BufferedReader br = new BufferedReader(new FileReader(this.path))) {
@@ -57,7 +60,7 @@ public class DB {
 		for(int i=0; i<this.rows-1; i++)
 		{
 			
-			this.doubleData[i][j] = 2020 - Double.parseDouble(this.stringData[i+1][j]);
+			this.doubleData[i][j] = (2020 - Double.parseDouble(this.stringData[i+1][j]));
 		}
 		
 		j=2;// converts selling price feature - 2
@@ -146,6 +149,9 @@ public class DB {
 		    copyYSet[minIndex] = Double.MAX_VALUE;
 		    this.doubleData[minIndex][j] = CED.encode(this.stringData[minIndex+1][0])/100;
 		}
+		this.carToFloat = CED.getCarToFloat();
+		this.floatToCar = CED.getFloatToCar();
+		
 	}
 	
 	public void printStringData() 
@@ -262,6 +268,29 @@ public class DB {
 	
 	    
 	}
+	public void normelizeData()
+	{
+		int numRows = this.cleanDoubleData.length;
+	    int numCols = this.cleanDoubleData[0].length;
+	    
+		 for (int j = 0; j < numCols; j++) 
+		 {
+		        DescriptiveStatistics colStats = new DescriptiveStatistics();
+		        for (int i = 0; i < numRows; i++)
+		        {
+		            colStats.addValue(this.cleanDoubleData[i][j]);
+		        }
+		        double mean = colStats.getMean();
+		        double std = colStats.getStandardDeviation();
+		        for (int i = 0; i < numRows; i++) {
+	
+		            this.cleanDoubleData[i][j] = (this.cleanDoubleData[i][j]- mean)/std;
+		        }
+		        
+		 }
+		 
+		
+	}
 	
 	public void buildYSet()
     {
@@ -292,8 +321,39 @@ public class DB {
     		
     	}
 	}
-
-
+	
+	public static double[] convertInputToDoublePrice(String[] input)
+	{
+		Dictionaries DC = new Dictionaries();
+		double[] doubleData = new double[7];
+		doubleData[0] = carToFloat.get(input[0])/100;// car name
+		doubleData[1] = 2020 - Double.parseDouble(input[1]); //age
+		doubleData[2] = Double.parseDouble(input[2])/10000;// kilometer
+		doubleData[3] = DC.getFuel().get(input[3]);// fuel
+		doubleData[4] = DC.getSeller_type().get(input[4]);// seller type
+		doubleData[5] = DC.getTransmission().get(input[5]);// transmission
+		doubleData[6] = DC.getOwner().get(input[6]);// owner
+		
+		System.out.print("");
+		return doubleData;
+	}
+	
+	public static double[] convertInputToDoubleCarModel(String[] input)
+	{
+		Dictionaries DC = new Dictionaries();
+		double[] doubleData = new double[7];
+		doubleData[0] = Double.parseDouble(input[0])/10000;// price
+		doubleData[1] = 2020 - Double.parseDouble(input[1]); //age
+		doubleData[2] = Double.parseDouble(input[2])/10000;// kilometer
+		doubleData[3] = DC.getFuel().get(input[3]);// fuel
+		doubleData[4] = DC.getSeller_type().get(input[4]);// seller type
+		doubleData[5] = DC.getTransmission().get(input[5]);// transmission
+		doubleData[6] = DC.getOwner().get(input[6]);// owner
+		
+		System.out.print("");
+		return doubleData;
+	}
+	
 	public double[] getY_Set() {
 		return Y_Set;
 	}
@@ -302,6 +362,12 @@ public class DB {
 	public double[][] getX_Set() {
 		return X_Set;
 	}
+
+
+	public static Map<Double, String> getFloatToCar() {
+		return floatToCar;
+	}
+	
 	
 	
 	

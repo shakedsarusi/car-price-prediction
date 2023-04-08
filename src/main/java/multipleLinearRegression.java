@@ -1,5 +1,5 @@
-package carPricePrediction;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class multipleLinearRegression {
@@ -71,20 +71,55 @@ public class multipleLinearRegression {
     	{
     		double predicted = hypothesis(X[i]);
     		double reallity = y[i];
+    		
     		if(reallity<predicted)
     		{
     			sum += (reallity/predicted)*100;
     		}
     		else
     		{
-    			sum += (predicted/reallity)*100;
+        		sum += (predicted/reallity)*100;
     		}
     	}
-    	sum = sum/X.length;
+    
+        	sum = sum/X.length;
     	
     	return sum;
+    	 
     }
     
+    public double predictPrice(double[] x)
+    {
+        double prediction = 0;
+        for (int i = 0; i < theta.length; i++) 
+        {
+            prediction += theta[i] * x[i];
+        }
+        return prediction*10000;
+    }
+    
+    public String predictCarModel(double[] x, Map<Double, String> map)
+    {
+        double prediction = x[0];
+        for (int i = 1; i < theta.length; i++) 
+        {
+            prediction -= theta[i] * x[i];
+        }
+        prediction = prediction/theta[0];
+        
+        Double closestKey = null;
+        double smallestDifference = Double.MAX_VALUE;
+        for (Double key : map.keySet())
+        {
+            double difference = Math.abs(prediction - key);
+            if (difference < smallestDifference)
+            {
+                smallestDifference = difference;
+                closestKey = key;
+            }
+        }
+        return map.get(closestKey);
+    }
     
     
     

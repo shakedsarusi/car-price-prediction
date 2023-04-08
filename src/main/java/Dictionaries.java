@@ -1,5 +1,3 @@
-package carPricePrediction;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,9 +74,4 @@ public class Dictionaries {
 	public Map<String, Double> getName() {
 		return name;
 	}
-	
-
-	
-	
-	
 }

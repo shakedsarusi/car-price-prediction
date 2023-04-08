@@ -1,5 +1,3 @@
-package carPricePrediction;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +32,10 @@ public class carEncoderDecoder {
 	public Map<String, Double> getCarToFloat() {
 		return carToFloat;
 	}
+
+	public Map<Double, String> getFloatToCar() {
+		return floatToCar;
+	}
+	
+	
 }
-    
-    
