@@ -32,7 +32,7 @@ public class Dictionaries {
 		 owner.put("First Owner", 0.0);
 		 owner.put("Second Owner", 1.0);
 		 owner.put("Third Owner", 2.0);
-		 owner.put("Fourth & Above Owner",3.0);
+		 owner.put("Fourth And Above Owner",3.0);
 		 
 		 this.Headers = new HashMap<String, Double>();
 		 Headers.put("name", 0.0);

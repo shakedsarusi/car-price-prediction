@@ -13,10 +13,10 @@ public class DB {
 	private int cols;
 	private String path;
 	private String[][] stringData;
-	public double[][] doubleData;
-	public double[][] cleanDoubleData;
-	public double[] Y_Set;
-	public double[][] X_Set;
+	private double[][] doubleData;
+	private double[][] cleanDoubleData;
+	private double[] Y_Set;
+	private double[][] X_Set;
 	public static Map<String, Double> carToFloat;
 	public static Map<Double, String> floatToCar;
 	
@@ -366,6 +366,11 @@ public class DB {
 
 	public static Map<Double, String> getFloatToCar() {
 		return floatToCar;
+	}
+
+
+	public static Map<String, Double> getCarToFloat() {
+		return carToFloat;
 	}
 	
 	
