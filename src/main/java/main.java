@@ -10,28 +10,26 @@ public class main {
 
 	public static void main(String[] args) {
 		
-		DB db = new DB(4341, 8,"C:\\Users\\Tal Goldbach\\Desktop\\CAR DETAILS FROM CAR DEKHO.csv" ); 
-		//db.printStringData();
-		db.convertDataToDouble();
-		db.cleanData();
-		//db.normelizeData();
-		//db.printDoubleData(db.cleanDoubleData);
-		db.buildYSet();
-		db.buildXSet();
-//		//db.descricsStats();
-		//db.printDoubleData(db.getX_Set());
-//		
-//		//db.printCleanDoubleData();
+		int ROWS = 4341;//number of rows in the data
+		int COLS = 8;// number of columns in the data(features)
+		DB db = new DB(ROWS, COLS,"C:\\Users\\Tal Goldbach\\Desktop\\CAR DETAILS FROM CAR DEKHO.csv" ); //create DB instance
+		db.convertDataToDouble();//convert data from String to Double
+		db.cleanData();// clean the data from illegal rows
+		db.buildYSet();// build Y Set contain only price column
+		db.buildXSet();// build X Set contain all columns except of price column
 		
-		multipleLinearRegression mlr = new multipleLinearRegression(db.getX_Set(),db.getY_Set());
-		mlr.gradientDescent();
-		System.out.println(mlr.percentAccuracy());
+		multipleLinearRegression mlr = new multipleLinearRegression(db.getX_Set(),db.getY_Set()); // create multipleLinearRegression instance
+		mlr.gradientDescent(); // activate the model
+		System.out.println(mlr.percentAccuracy()); //Calculate percent accuracy of the model
 		System.out.println();
 		
 		// Create a new Javalin instance
-        Javalin app = Javalin.create(config -> {
-            config.plugins.enableCors(cors -> {
-                cors.add(it -> {
+        Javalin app = Javalin.create(config -> 
+        {
+            config.plugins.enableCors(cors ->
+            {
+                cors.add(it ->
+                {
                     it.anyHost();
                 });
             });
@@ -44,7 +42,9 @@ public class main {
             ctx.result("Hello, world!");
         });
         
-        app.get("/price", ctx -> {
+        // Set up a GET route to get input from client and return the car price prediction
+        app.get("/price", ctx -> 
+        {
             String CarName = ctx.queryParam("CarName");
             String Year = ctx.queryParam("Year");
             String Kilometer = ctx.queryParam("Kilometer");
@@ -53,14 +53,15 @@ public class main {
             String Transmisson = ctx.queryParam("Transmisson");
             String Owner = ctx.queryParam("Owner");
             String [] input = {CarName, Year, Kilometer, Fuel, SellerType, Transmisson, Owner};
-            double result = mlr.predictPrice(DB.convertInputToDoublePrice(input));
+            double result = mlr.predictPrice(DB.convertInputToDoublePrice(input)); // Predicting the price of the vehicle according to the data entered by the user
             int resultInteger = (int)result;
-            ctx.result(Integer.toString(resultInteger));
+            ctx.result(Integer.toString(resultInteger));//Returning the predicted car price to the user
           
         });	
         
-        app.get("/carName", ctx -> {
-        	//ctx.header(Header.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+        // Set up a GET route to get input from client and return the car model prediction
+        app.get("/carName", ctx ->
+        {
             String Price = ctx.queryParam("Price");
             String Year = ctx.queryParam("Year");
             String Kilometer = ctx.queryParam("Kilometer");
@@ -69,11 +70,13 @@ public class main {
             String Transmisson = ctx.queryParam("Transmisson");
             String Owner = ctx.queryParam("Owner");
             String [] input = {Price, Year, Kilometer, Fuel, SellerType, Transmisson, Owner};
-            String result = mlr.predictCarModel(DB.convertInputToDoubleCarModel(input), DB.getFloatToCar());
-            ctx.result(result);
+            String result = mlr.predictCarModel(DB.convertInputToDoubleCarModel(input), DB.getFloatToCar());// Predicting the car model of the according to the data entered by the user
+            ctx.result(result);//Returning the predicted car model to the user
         });
         
-        app.get("/listOfCars", ctx -> {
+        // Set up a GET route to get send frontend the list of cars
+        app.get("/listOfCars", ctx -> 
+        {
         	
         	Set<String> listOfCars = DB.getCarToFloat().keySet();
         	 // allocate memory for string array

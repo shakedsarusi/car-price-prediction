@@ -8,20 +8,23 @@ import java.util.Map;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-public class DB {
-	private int rows;
-	private int cols;
-	private String path;
-	private String[][] stringData;
-	private double[][] doubleData;
-	private double[][] cleanDoubleData;
-	private double[] Y_Set;
-	private double[][] X_Set;
-	public static Map<String, Double> carToFloat;
-	public static Map<Double, String> floatToCar;
+public class DB 
+{
+	private int rows; // number of rows in the data
+	private int cols; // number of columns in the data
+	private String path; // The path to the file that contains the data
+	private String[][] stringData; // data in String format
+	private double[][] doubleData; // data in Double format
+	private double[][] cleanDoubleData;// data in Double format after clean
+	private double[] Y_Set; // A one-dimensional array containing only the price column
+	private double[][] X_Set; // A two-dimensional array containing all columns except the price column
+	public static Map<String, Double> carToFloat;// A dictionary that contains the name of the car as a key and the numerical representation of the car as a value
+	public static Map<Double, String> floatToCar;// A dictionary that contains the numerical representation of the price as a key and the name of the car as the value
 	
-	public DB(int rows, int cols, String path) {
-		
+	
+	//init function 
+	public DB(int rows, int cols, String path) 
+	{
 		this.rows = rows;
 		this.cols = cols;
 		this.path = path;
@@ -29,30 +32,36 @@ public class DB {
 		this.carToFloat = new HashMap<String, Double>();
 		this.floatToCar = new HashMap<Double, String>();
 		
-		 String line;
-	        try (BufferedReader br = new BufferedReader(new FileReader(this.path))) {
-
+		String line;
+	        try (BufferedReader br = new BufferedReader(new FileReader(this.path)))
+	        {
 	            int i = 0;
-	            while ((line = br.readLine()) != null) {
+	            while ((line = br.readLine()) != null) 
+	            {
 	                String[] fields = line.split(","); // split the line into an array of strings using comma as the delimiter
-	                for (int j = 0; j < fields.length; j++) {
+	                for (int j = 0; j < fields.length; j++) 
+	                {
 	                    this.stringData[i][j] = fields[j];
 	                }
 	                i++;
 	            }
-
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	        }		
 	}
 	
 	
+	
+//	An operation that converts all the values in the database 
+//	from string values to double values, the function uses the
+//	dictionaries class and the carEncoderDecoder 
+//	class to convert each value to its numerical representation
 	public void convertDataToDouble()
 	{
-		this.doubleData = new double[this.rows-1][this.cols];
-		this.Y_Set = new double[this.rows-1];
-		Dictionaries DC = new Dictionaries();
-		carEncoderDecoder CED = new carEncoderDecoder();
+		this.doubleData = new double[this.rows-1][this.cols];//Initialize a 2D double array
+		this.Y_Set = new double[this.rows-1];//Initialize a double array contains price column
+		Dictionaries DC = new Dictionaries();//Creating an instance of Dictionaries
+		carEncoderDecoder CED = new carEncoderDecoder();//Creating an instance of carEncoderDecoder
 		double[] copyYSet = new double[this.rows-1];
 		int j; //represented the feature
 		
@@ -132,7 +141,9 @@ public class DB {
 		}
 		
 		
-		
+		//Converts the car name to a number so that the car name with 
+		//the highest price gets the highest number and the car with the 
+		//lowest price gets the number 0.
 		j=0;// converts car name feature - 0
 		for(int i=0; i<this.rows-1; i++)
 		{
@@ -158,17 +169,22 @@ public class DB {
 	{
 	    // Determine the maximum length of each column
 	    int[] maxColumnLengths = new int[this.stringData[0].length];
-	    for (int i = 0; i < this.stringData.length; i++) {
-	        for (int j = 0; j < this.stringData[i].length; j++) {
-	            if (this.stringData[i][j].length() > maxColumnLengths[j]) {
+	    for (int i = 0; i < this.stringData.length; i++)
+	    {
+	        for (int j = 0; j < this.stringData[i].length; j++) 
+	        {
+	            if (this.stringData[i][j].length() > maxColumnLengths[j])
+	            {
 	                maxColumnLengths[j] = this.stringData[i][j].length();
 	            }
 	        }
 	    }
 	    
 	    // Print the table
-	    for (int i = 0; i < this.stringData.length; i++) {
-	        for (int j = 0; j < this.stringData[i].length; j++) {
+	    for (int i = 0; i < this.stringData.length; i++) 
+	    {
+	        for (int j = 0; j < this.stringData[i].length; j++) 
+	        {
 	            System.out.printf("%-" + (maxColumnLengths[j] + 2) + "s", this.stringData[i][j]);
 	        }
 	        System.out.println();
@@ -176,11 +192,11 @@ public class DB {
 	}
 	
 	
-	
+	//The function clears all rows that contain errors in the data
 	public void cleanData()
 	{
 		int count=0;// count illegal rows
-		ArrayList<Integer> illegalRowsIndex = new ArrayList<>();
+		ArrayList<Integer> illegalRowsIndex = new ArrayList<>();//arrayList that contains all the indexes (rows) where there are errors in the data
 		for(int i=0; i<this.rows-1; i++)
 			{
 				for(int j=0; j<this.cols; j++)
@@ -193,13 +209,14 @@ public class DB {
 					
 				}
 			}
-		this.cleanDoubleData = new double[this.rows-count-1][this.cols];
+		this.cleanDoubleData = new double[this.rows-count-1][this.cols];//Initializes cleanDoubleData which 
+																		//contains the data after cleaning the values with the errors
 		int t=0;
 		for(int i=0; i<this.rows-1; i++)
 		{
 			for(int j=0; j<this.cols; j++)
 			{
-				if(!illegalRowsIndex.contains(i))
+				if(!illegalRowsIndex.contains(i))//Checks whether the current row is valid or not
 				{
 					this.cleanDoubleData[t][j] = this.doubleData[i][j];
 				}
@@ -212,42 +229,61 @@ public class DB {
 		}
 		
 	}
-	public void printDoubleData(double[][] data) {
+	
+	public void printDoubleData(double[][] data)
+	{
 		 int[] maxColumnLengths = new int[data[0].length];
-		    for (int i = 0; i < data.length; i++) {
-		        for (int j = 0; j < data[i].length; j++) {
+		    for (int i = 0; i < data.length; i++) 
+		    {
+		        for (int j = 0; j < data[i].length; j++)
+		        {
 		            String valueStr = Double.toString(data[i][j]);
 		            int valueLength = valueStr.length();
-		            if (valueLength > maxColumnLengths[j]) {
+		            if (valueLength > maxColumnLengths[j]) 
+		            {
 		                maxColumnLengths[j] = valueLength;
 		            }
 		        }
 		    }
 		    
 		    // Print the table
-		    for (int i = 0; i < data.length; i++) {
-		        for (int j = 0; j < data[i].length; j++) {
+		    for (int i = 0; i < data.length; i++)
+		    {
+		        for (int j = 0; j < data[i].length; j++) 
+		        {
 		            System.out.printf("%-" + (maxColumnLengths[j] + 2) + "s", data[i][j]);
 		        }
 		        System.out.println();
 		    }
 	}
 	
+//	This function prints the statistics of each column and the
+//	linear relationship of each column with the price column.
+//	The statistics:
+//	1. Quantity
+//	2. Average
+//	3. Static standard
+//	4. Minimum
+//	5. Maximum
+//	6. The 25th percentile
+//	7. The 50th percentile
+//	8. The 75th percentile
 	public void descricsStats()
 	{
 		int numRows = this.cleanDoubleData.length;
 	    int numCols = this.cleanDoubleData[0].length;
-	    Dictionaries DC = new Dictionaries();
-	    PearsonsCorrelation corr = new PearsonsCorrelation();
-	    double[] currentCol = new double[this.cleanDoubleData.length];
+	    PearsonsCorrelation corr = new PearsonsCorrelation();//Creating an instance of PearsonsCorrelation to calculate the correlation 
+	    													 //between the price column and the other columns
+	    double[] currentCol = new double[this.cleanDoubleData.length];//the current column
 	    
-	    for (int j = 0; j < numCols; j++) {
-	        DescriptiveStatistics colStats = new DescriptiveStatistics();
-	        for (int i = 0; i < numRows; i++) {
+	    for (int j = 0; j < numCols; j++) 
+	    {
+	        DescriptiveStatistics colStats = new DescriptiveStatistics();//Creating an instance of DescriptiveStatistics to calculate the statistics
+	        for (int i = 0; i < numRows; i++)
+	        {
 	            colStats.addValue(this.cleanDoubleData[i][j]);
 	            currentCol[i] = this.cleanDoubleData[i][j];
 	        }
-	        
 	        
 	        System.out.println("Column: " + this.stringData[0][j]);
 	        System.out.println("Count: " + colStats.getN());
@@ -259,7 +295,7 @@ public class DB {
 	        System.out.println("Median: " + colStats.getPercentile(50));
 	        System.out.println("75th percentile: " + colStats.getPercentile(75));
 	        
-	        double correlation = corr.correlation(currentCol, this.Y_Set);
+	        double correlation = corr.correlation(currentCol, this.Y_Set);//The correlation between the convenience column and the price column
 	        System.out.println("Correlation between columns " + this.stringData[0][j] + " and selling_price: " + correlation);
 	        System.out.println();
 	        
@@ -268,30 +304,34 @@ public class DB {
 	
 	    
 	}
+	
+	//Normalize the database according to the following formula: x=(x-mean)/std
+	//x - the current value
+	//mean - the average of the column where the value x is found
+	//std - static The standard of the column in which the value x is found
 	public void normelizeData()
 	{
-		int numRows = this.cleanDoubleData.length;
-	    int numCols = this.cleanDoubleData[0].length;
+		int numRows = this.cleanDoubleData.length;// num of rows
+	    int numCols = this.cleanDoubleData[0].length;// num of cols
 	    
 		 for (int j = 0; j < numCols; j++) 
 		 {
-		        DescriptiveStatistics colStats = new DescriptiveStatistics();
+		        DescriptiveStatistics colStats = new DescriptiveStatistics();//Creating an instance of DescriptiveStatistics to calculate the mean and standard deviation
 		        for (int i = 0; i < numRows; i++)
 		        {
-		            colStats.addValue(this.cleanDoubleData[i][j]);
+		            colStats.addValue(this.cleanDoubleData[i][j]);//current column
 		        }
-		        double mean = colStats.getMean();
-		        double std = colStats.getStandardDeviation();
-		        for (int i = 0; i < numRows; i++) {
-	
-		            this.cleanDoubleData[i][j] = (this.cleanDoubleData[i][j]- mean)/std;
-		        }
-		        
+		        double mean = colStats.getMean();//Calculate the average of the current column
+		        double std = colStats.getStandardDeviation();//Calculation of the standard deviation of the current column
+		        for (int i = 0; i < numRows; i++)
+		        {
+		            this.cleanDoubleData[i][j] = (this.cleanDoubleData[i][j]- mean)/std;//The normalization operation
+		        }  
 		 }
-		 
-		
 	}
 	
+	
+	//Building a Y_Set that contains only the price column
 	public void buildYSet()
     {
 		this.Y_Set = new double[this.cleanDoubleData.length];
@@ -302,13 +342,14 @@ public class DB {
     }
 	
 	
+	//Building an X_Set that contains the data except the price column
 	public void buildXSet()
 	{
 		this.X_Set = new double[this.cleanDoubleData.length][this.cols-1];
 		int t=0;
 		for(int i=0; i<this.cols-1; i++)
     	{
-			if(t==2)
+			if(t==2)//Checks with the current column is the price column
 			{
 				t++;
 			}
@@ -322,6 +363,8 @@ public class DB {
     	}
 	}
 	
+	
+	//This function converts the user input which is in string format to double format
 	public static double[] convertInputToDoublePrice(String[] input)
 	{
 		Dictionaries DC = new Dictionaries();
@@ -338,6 +381,8 @@ public class DB {
 		return doubleData;
 	}
 	
+	
+	//This function converts the user input which is in string format to double format
 	public static double[] convertInputToDoubleCarModel(String[] input)
 	{
 		Dictionaries DC = new Dictionaries();
@@ -353,6 +398,7 @@ public class DB {
 		System.out.print("");
 		return doubleData;
 	}
+	
 	
 	public double[] getY_Set() {
 		return Y_Set;
